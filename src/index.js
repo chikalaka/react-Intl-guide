@@ -1,3 +1,5 @@
+import { addLocaleData } from 'react-intl'
+
 export const formatIntlLiteral = ({ id, values }) => {
   const msg = getFlattenLocaleMessages()[id]
 
@@ -39,3 +41,14 @@ export const getFlattenLocaleMessages = () => {
   const file = getLocaleFile(locale)
   return flatten(file.translation)
 }
+
+const getLocaleData = () =>
+globalConfig.supportedLanguages.reduce((acc, lang) => {
+  try {
+    return [...acc, ...require(`react-intl/locale-data/${lang}`)]
+} catch (e) {
+  console.error(`Error: Module not found: Can't resolve 'react-intl/locale-data/${lang}'`)
+}
+}, [])
+
+export const setLocaleData = addLocaleData(getLocaleData());
