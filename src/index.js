@@ -43,7 +43,11 @@ const getLocaleFile = (locale) => {
     file = require(`translations/${locale}.js`)
     supportedLocale = locale
   } catch (e) {
-    file = require(`translations/en.js`)
+    try {
+      file = require(`translations/en.js`)
+    } catch (e) {
+      console.error(e, 'You MUST have a directory called translations and a file inside called en.js')
+    }
     supportedLocale = 'en'
   }
   addLocaleData(getLocaleData([supportedLocale]))

@@ -1,6 +1,6 @@
 {
   "name": "with-react-intl",
-  "version": "0.1.0",
+  "version": "0.0.1",
   "description": "Internationalize React apps with a simple HOC and retrieve localized message either by a Component (with yahoo/react-intl) or as a String.",
   "keywords": [
     "intl",
@@ -26,6 +26,10 @@
   "bugs": {
     "url": "https://github.com/chikalaka/with-react-intl/issues"
   },
+  "main": "build/index.js",
+  "files": [
+    "dist"
+  ],
   "repository": {
     "type": "git",
     "url": "git@github.com:chikalaka/with-react-intl.git"
@@ -33,11 +37,25 @@
   "dependencies": {
     "flat": "^4.0.0",
     "intl-messageformat": "^2.2.0",
-    "react": "^16.3.2",
     "react-intl": "^2.4.0",
-    "recompose": "^0.26.0"
+    "recompose": "^0.26.0",
+    "react": "^15.5.4",
+    "webpack": "^2.6.1"
   },
   "peerDependencies": {
     "react": "^0.14.9 || ^15.0.0 || ^16.0.0"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "webpack --watch",
+    "build": "webpack"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.24.1",
+    "babel-core": "^6.24.1",
+    "babel-loader": "^7.0.0",
+    "babel-plugin-transform-object-rest-spread": "^6.23.0",
+    "babel-plugin-transform-react-jsx": "^6.24.1",
+    "babel-preset-env": "^1.5.1"
   }
 }
