@@ -1,6 +1,12 @@
-import { addLocaleData } from 'react-intl'
+import React from 'react'
+import { flatten } from 'flat'
+import IntlMessageFormat from 'intl-messageformat'
+import { addLocaleData, IntlProvider } from 'react-intl'
+import { compose, withStateHandlers } from 'recompose'
 
-export const formatIntlLiteral = ({ id, values }) => {
+let userLocaleInput;
+
+export const formatIntlLiteral = ({ id, values, defaultMessage }) => {
   const msg = getFlattenLocaleMessages()[id]
 
   let formattedMessage = id
@@ -9,41 +15,54 @@ export const formatIntlLiteral = ({ id, values }) => {
     try {
       formattedMessage = intlMsg.format(values)
     } catch (error) {
-      console.error(error)
-      formattedMessage = msg
+      console.error(error, `using ${defaultMessage ? 'defaultMessage' : 'message id'} as fallback`)
+      formattedMessage = defaultMessage || msg
     }
   } else {
-    console.error(`Error: Missing id: '${id}' for locale: "${getLocaleWithoutRegionCode()}", using message id as fallback`)
+    console.error(`Error: Missing id: '${id}' for locale: "${getDefaultLocale()}", using message id as fallback`)
   }
 
   return formattedMessage
 }
 
-const getLocaleWithoutRegionCode = () => navigator.language.toLowerCase().split(/[-_]+/)[0]
-
-export const getSupportedLocale = () => {
-  const locale = getLocaleWithoutRegionCode()
-  return isLocaleSupported(locale) ? locale : 'en'
-}
-
-const isLocaleSupported = (locale) => globalConfig.supportedLanguages.indexOf(locale) > -1
-
-const getLocaleFile = locale => {
+const getDefaultLocale = () => {
+  const locale = userLocaleInput || navigator.language
+  const localeWithoutRegionCode = locale.toLowerCase().split(/[-_]+/)[0]
   try {
-    return require(`intl/${locale}.js`)
+    const fileExists = require(`translations/${localeWithoutRegionCode}.js`)
+    return localeWithoutRegionCode
   } catch (e) {
-    return require(`intl/en.js`)
+    return 'en'
   }
 }
 
-export const getFlattenLocaleMessages = () => {
-  const locale = getSupportedLocale()
-  const file = getLocaleFile(locale)
-  return flatten(file.translation)
+const getLocaleFile = (locale) => {
+  let supportedLocale;
+  let file;
+  try {
+    file = require(`translations/${locale}.js`)
+    supportedLocale = locale
+  } catch (e) {
+    file = require(`translations/en.js`)
+    supportedLocale = 'en'
+  }
+  addLocaleData(getLocaleData([supportedLocale]))
+  return file
 }
 
-const getLocaleData = () =>
-globalConfig.supportedLanguages.reduce((acc, lang) => {
+const getFlattenLocaleMessages = () => {
+  const locale = getDefaultLocale()
+  const file = getLocaleFile(locale)
+  try {
+    return flatten(file.translation)
+  } catch (e) {
+    console.error(`Error: an error occurred while trying to flatten translation, make sure you have exported an object called "translation"`)
+    return {}
+  }
+}
+
+const getLocaleData = (supportedLocales = ['en']) =>
+supportedLocales.reduce((acc, lang) => {
   try {
     return [...acc, ...require(`react-intl/locale-data/${lang}`)]
 } catch (e) {
@@ -51,4 +70,23 @@ globalConfig.supportedLanguages.reduce((acc, lang) => {
 }
 }, [])
 
-export const setLocaleData = addLocaleData(getLocaleData());
+const enhance = compose(
+  withStateHandlers(
+    { locale: navigator.language },
+    {
+      setLocale: (state, props) => locale => {
+    userLocaleInput = locale
+    return { locale }
+  }
+}
+)
+)
+
+const withReactIntl = BaseComponent => {
+  return enhance((props) =>
+    <IntlProvider locale={getDefaultLocale()} messages={getFlattenLocaleMessages()}>
+    <BaseComponent {...props} />
+  </IntlProvider>)
+}
+
+export default withReactIntl
