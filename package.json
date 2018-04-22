@@ -1,6 +1,6 @@
 {
   "name": "with-react-intl",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "description": "Internationalize React apps with a simple HOC and retrieve localized message either by a Component (with yahoo/react-intl) or as a String.",
   "keywords": [
     "intl",
@@ -26,10 +26,7 @@
   "bugs": {
     "url": "https://github.com/chikalaka/with-react-intl/issues"
   },
-  "main": "build/index.js",
-  "files": [
-    "dist"
-  ],
+  "main": "src/index.js",
   "repository": {
     "type": "git",
     "url": "git@github.com:chikalaka/with-react-intl.git"

@@ -39,6 +39,7 @@ requirements:
 - files should be *.js
 - files should be named after the locale you want (e.g. en.js, es.js)
 - files should contain an exported object called translation
+- MUST contain en.js file - this will be the default file!
 example:
 en.js:
 const NUM_OF_PERSONS = `{numOfPersons, plural, 
