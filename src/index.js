@@ -5,6 +5,8 @@ import { addLocaleData, IntlProvider } from 'react-intl'
 import { compose, withStateHandlers } from 'recompose'
 
 let userLocaleInput;
+let userTranslationsInput;
+let userDefaultLocale;
 
 export const formatIntlLiteral = ({ id, values, defaultMessage }) => {
   const msg = getFlattenLocaleMessages()[id]
@@ -25,72 +27,48 @@ export const formatIntlLiteral = ({ id, values, defaultMessage }) => {
   return formattedMessage
 }
 
+const isLocaleSupported = locale => !!userTranslationsInput[locale]
+
 const getDefaultLocale = () => {
   const locale = userLocaleInput || navigator.language
   const localeWithoutRegionCode = locale.toLowerCase().split(/[-_]+/)[0]
-  try {
-    const fileExists = require(`translations/${localeWithoutRegionCode}.js`)
-    return localeWithoutRegionCode
-  } catch (e) {
-    return 'en'
-  }
-}
 
-const getLocaleFile = (locale) => {
-  let supportedLocale;
-  let file;
-  try {
-    file = require(`translations/${locale}.js`)
-    supportedLocale = locale
-  } catch (e) {
-    try {
-      file = require(`translations/en.js`)
-    } catch (e) {
-      console.error(e, 'You MUST have a directory called translations and a file inside called en.js')
-    }
-    supportedLocale = 'en'
-  }
-  addLocaleData(getLocaleData([supportedLocale]))
-  return file
+  if (isLocaleSupported(localeWithoutRegionCode)) return localeWithoutRegionCode
+  return userDefaultLocale || 'en'
 }
 
 const getFlattenLocaleMessages = () => {
   const locale = getDefaultLocale()
-  const file = getLocaleFile(locale)
-  try {
-    return flatten(file.translation)
-  } catch (e) {
-    console.error(`Error: an error occurred while trying to flatten translation, make sure you have exported an object called "translation"`)
-    return {}
-  }
+  const messages = userTranslationsInput[locale] || Object.values(userTranslationsInput)[0]
+
+  return flatten(messages)
 }
 
-const getLocaleData = (supportedLocales = ['en']) =>
-supportedLocales.reduce((acc, lang) => {
-  try {
-    return [...acc, ...require(`react-intl/locale-data/${lang}`)]
-} catch (e) {
-  console.error(`Error: Module not found: Can't resolve 'react-intl/locale-data/${lang}'`)
-}
-}, [])
+const getLocaleData = (localeData = []) =>
+  localeData.reduce((acc, lang) => {
+    return [...acc, ...lang]
+  }, [])
 
 const enhance = compose(
   withStateHandlers(
     { locale: navigator.language },
     {
       setLocale: (state, props) => locale => {
-    userLocaleInput = locale
-    return { locale }
-  }
-}
-)
+        userLocaleInput = locale
+        return { locale }
+      }
+    }
+  )
 )
 
-const withReactIntl = BaseComponent => {
+const withReactIntl = ({ localeData, translations, defaultLocale }) => BaseComponent => {
+  addLocaleData(getLocaleData(localeData))
+  userTranslationsInput = translations
+  userDefaultLocale = defaultLocale
   return enhance((props) =>
     <IntlProvider locale={getDefaultLocale()} messages={getFlattenLocaleMessages()}>
-    <BaseComponent {...props} />
-  </IntlProvider>)
+      <BaseComponent {...props} />
+    </IntlProvider>)
 }
 
 export default withReactIntl
