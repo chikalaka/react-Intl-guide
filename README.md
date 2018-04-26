@@ -1,6 +1,5 @@
 # with-react-intl
 
-description: 
 Internationalize React apps with a simple HOC and retrieve localized message either by a Component (with yahoo/react-intl) or as a String 
 
 Internationalize React apps with [**react-intl**](https://github.com/yahoo/react-intl) and [**intl-messageformat**](https://github.com/yahoo/intl-messageformat) with a simple HOC - `withReactIntl`.
