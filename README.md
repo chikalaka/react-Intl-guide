@@ -12,11 +12,11 @@ Features:
 - Figure the user locale from the browser or from the user input
 - Inject props: `locale` and `setLocale`, to get and set locale manually
 - Get formatted message as a String
+- Load and add locale data and messages dynamically, no need for hard-coding anything
 
 TL;DR steps:
-1. Create translations files (.js)
-2. import localeData from react-intl/locale-data and your translations files
-3. Wrap App with withReactIntl HOC and pass localeData and translations
+1. Add `${locale}.js` files to `translations` directory
+2. Wrap App with withReactIntl HOC
 Done!
 
 ### Install
@@ -32,6 +32,9 @@ yarn add react-intl with-react-intl
 Create js files containing an object with all the translated messages.
 requirements:
 - files should be *.js
+- files should be at the directory `ROOT/translations/`
+- files should be named after the locale you want (e.g. en.js, es.js)
+- files should contain an exported object called `translation`
 example:
 ```js
 // en.js
@@ -54,37 +57,19 @@ recommended conventions:
 - message ids that are not generic and should be used only in a specific component (aka `numberOfComments` in `CommentList`) should be nested in an id with the name of the component (aka `CommentList` PascalCase).
 - message ids should not start with an Uppercase, unless it is a component, obviously for confusion reasons.
 
-### Step 2 - import supported localeData and translations files
-example:
+### Step 2 - Wrap your `App`
+Wrap your app component with the HOC - `withReactIntl`
 ```js
 // App.js
-import enLocaleData from 'react-intl/locale-data/en'
-import esLocaleData from 'react-intl/locale-data/es'
-import {translation as en} from 'translations/en'
-import {translation as es} from 'translations/es'
-// ...
-```
-
-requirements
-- import only supported locales!
-
-### Step 3 - Wrap your `App`
-Wrap your app component with the HOC - `withReactIntl`
-Pass an object containing `localeData` and `translations` - both required.
-`localeData` - Array of localeData from `react-intl`
-`translations` - Object containing locales as keys and messages as values
-App.js:
-```js
 import React from 'react'
 import withReactIntl from 'with-react-intl'
-// imports from step 2
 
 const App = () =>
   <div>
     // ...
   </div>
 
-export default withReactIntl({localeData: [enLocaleData, esLocaleData], translations: { en, es }})(App)
+export default withReactIntl(App)
 ```
 
 ### Start coding
@@ -105,7 +90,8 @@ const formattedString = formatIntlLiteral({ id: 'CommentList.numberOfPersons', v
 ```
 
 ### Extra details
-- locales are added from `react-intl/locale-data/${locale}` with `addLocaleData` from `react-intl`
+- locales are loaded dynamically from `react-intl/locale-data/${locale}` with `addLocaleData` from `react-intl`
+- supported locales from your `translations` directory are also loaded dynamically
 - locale is resolved from the browser by `navigator.language` and gets the locale without region code (i.e. 'fr-Fr' is resolved to 'fr')
 - `${locale}.js` files are flatten with `{ flatten } from 'flat'`
 - `formatIntlLiteral` has the following fallback algorithm:
