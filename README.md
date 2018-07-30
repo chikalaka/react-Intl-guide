@@ -63,7 +63,8 @@ Wrap your app component with the HOC - `withReactIntl`
 import React from 'react'
 import withReactIntl from 'with-react-intl'
 
-const App = () =>
+// locale and setLocale passed from withReactIntl
+const App = ({ locale, setLocale }) =>
   <div>
     // ...
   </div>
@@ -101,7 +102,6 @@ const formattedString = formatIntlLiteral({ id: 'CommentList.numberOfPersons', v
 - how locale is defined?
     - Lookup for user's `locale` input
     - Fallback to `navigator.language` (user preferred language in the browser)
-    - Fallback to user's `defaultLocale` input
     - Fallback to `"en"`
 
 
